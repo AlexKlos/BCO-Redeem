@@ -60,17 +60,29 @@ contract BCORedeem {
     }
 
     /**
-     * Функция работает при наличии USDT на балансе контракта, BCO на балансе вызывающего адреса 
-     * и отсутствии адреса, вызывающего функцию, в реестре bcoBurnerAddressMap.
-     * Возвращает адрес созданного контракта BCOBurner
+     * Функция работает при наличии USDT на балансе контракта и BCO на балансе вызывающего адреса. 
+     * При отсутствии адреса, вызывающего функцию, в реестре bcoBurnerAddressMap, создаёт контракт BCOBurner,
+     * переводит на него USDT для выкупа BCO и возвращает адрес созданного контракта BCOBurner.
+     * Если адрес, вызвавший функцию, присутствует в реестре, то переводит на него недостающую сумму USDT 
+     * для выкупа BCO и возвращает адрес контракта BCOBurner. 
      */
     function redeem() external returns (address bcoBurnerAddress) {
         
         require(bcoContract.balanceOf(msg.sender) != 0);
         require(tetherTokenContract.balanceOf(address(this)) != 0);
         
-        if (bcoBurnerAddressMap[msg.sender] == 0) {
-            
+        if (bcoBurnerAddressMap[msg.sender] != 0) {
+            address _bcoBurnerAddress = new BCOBurner(msg.sender, owner, address(this), timeLimit);
+            bcoBurnerAddressMap[msg.sender] = _bcoBurnerAddress;
+            tetherTokenContract.transfer(_bcoBurnerAddress, bcoContract.balanceOf(msg.sender));
+            return _bcoBurnerAddress;
+        } else {
+            _bcoBurnerAddress = bcoBurnerAddressMap[msg.sender];
+            if (bcoContract.balanceOf(msg.sender) > tetherTokenContract.balanceOf(_bcoBurnerAddress)) {
+                tetherTokenContract.transfer(_bcoBurnerAddress, 
+                SafeMath.sub(bcoContract.balanceOf(msg.sender), tetherTokenContract.balanceOf(_bcoBurnerAddress)));
+            }
+            return _bcoBurnerAddress;
         }
     }
     
@@ -112,7 +124,7 @@ contract BCORedeem {
 
 
 /**
- * Контракт для сжигония BCO и возврата USDT
+ * Контракт для сжигания BCO и возврата USDT
  */
 contract BCOBurner {
     using SafeMath for uint;
