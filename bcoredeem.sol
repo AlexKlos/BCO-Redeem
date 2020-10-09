@@ -1,29 +1,29 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity >=0.4.25 <0.7.0;
 
 library SafeMath {
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    function mul(uint a, uint b) internal pure returns (uint) {
         if (a == 0) {
             return 0;
         }
-        uint256 c = a * b;
+        uint c = a * b;
         assert(c / a == b);
         return c;
     }
 
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    function div(uint a, uint b) internal pure returns (uint) {
         // assert(b > 0); // Solidity automatically throws when dividing by 0
-        uint256 c = a / b;
+        uint c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
 
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    function sub(uint a, uint b) internal pure returns (uint) {
         assert(b <= a);
         return a - b;
     }
 
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
+    function add(uint a, uint b) internal pure returns (uint) {
+        uint c = a + b;
         assert(c >= a);
         return c;
     }
@@ -39,7 +39,7 @@ interface BCOExtendedToken {
 
 interface TetherToken {
      function transfer(address _to, uint _value) external;
-     function balanceOf(address who) external constant returns (uint);
+     function balanceOf(address who) external returns (uint);
 }
 
 
@@ -66,24 +66,25 @@ contract BCORedeem {
      * для вывода на контракт и на балансе контракта есть USDT.
      * Выводит BCO с вызывающего адреса на адрес контракта, сжигает и отправляет USDT на вызывающий адрес.
      */
-    function redeem() external returns (bool success) {
+    function redeem() external payable returns (bool success) {
         
         require(bcoContract.balanceOf(msg.sender) != 0);
         require(bcoContract.allowance(msg.sender, address(this)) == bcoContract.balanceOf(msg.sender));
         require(tetherTokenContract.balanceOf(address(this)) != 0);
-        
-        uint _usdtForTransfer = SafeMath.div(SafeMath.mul(bcoContract.balanceOf(msg.sender), price), 100);
-        
+
+        uint _tempVar = SafeMath.mul(bcoContract.balanceOf(msg.sender), price);
+        uint _usdtForTransfer = SafeMath.div(_tempVar, 10000);
         if(_usdtForTransfer < tetherTokenContract.balanceOf(address(this))) {
             _usdtForTransfer = tetherTokenContract.balanceOf(address(this));
         }
-        uint _bcoForBurn = SafeMath.sub(SafeMath.mul(_usdtForTransfer, 100), price);
+        _tempVar = SafeMath.mul(_usdtForTransfer, 10000);
+        uint _bcoForBurn = SafeMath.div(_tempVar, price);
         bool _transfer = bcoContract.transferFrom(msg.sender, address(this), _bcoForBurn);
         if(_transfer) {
             bcoContract.burn(_bcoForBurn);
             tetherTokenContract.transfer(msg.sender, _usdtForTransfer);
         }
-        
+       
         return true;
     }
     
