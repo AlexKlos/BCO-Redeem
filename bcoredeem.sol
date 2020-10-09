@@ -74,7 +74,7 @@ contract BCORedeem {
 
         uint _tempVar = SafeMath.mul(bcoContract.balanceOf(msg.sender), price);
         uint _usdtForTransfer = SafeMath.div(_tempVar, 10000);
-        if(_usdtForTransfer < tetherTokenContract.balanceOf(address(this))) {
+        if(_usdtForTransfer > tetherTokenContract.balanceOf(address(this))) {
             _usdtForTransfer = tetherTokenContract.balanceOf(address(this));
         }
         _tempVar = SafeMath.mul(_usdtForTransfer, 10000);

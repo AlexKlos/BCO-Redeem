@@ -1,4 +1,4 @@
-BCORedeem 0x6069126b9026ae6eb3458e32e9904d566ee1a8d8
+BCORedeem 0xeff2ae2a23f726055cc1fb55db398f7a271e6cfb
 BCOExtendedToken 0x08ECa7A3b77664381B1C96f8657dE24bf1e307E5
 TetherToken 0x3096e8581d08e01FBC813C2603EB6e10268A76D7
 Owner(BCO, Redeem, USDT) 0x3096e8581d08e01FBC813C2603EB6e10268A76D7
@@ -8,19 +8,19 @@ Owner(BCO, Redeem, USDT) 0x3096e8581d08e01FBC813C2603EB6e10268A76D7
 3  allowance = 0, USDT < BCO f
 4  allowance = 0, USDT = 0, BCO = 0 f
 5  allowance = 0, USDT != 0, BCO = 0 f
-6  allowance = 0, USDT = 0, BCO != 0 f
+6  + allowance = 0, USDT = 0, BCO != 0 f
 7  allowance < BCO, USDT > BCO f
 8  allowance < BCO, USDT = BCO f
 9  allowance < BCO, USDT < BCO f
 10 allowance < BCO, USDT = 0, BCO = 0 f
 11 allowance < BCO, USDT != 0, BCO = 0 f
 12 allowance < BCO, USDT = 0, BCO != 0 f
-13 allowance = BCO, USDT > BCO s
+13 + allowance = BCO, USDT > BCO s
 14 + allowance = BCO, USDT = BCO s
-15 allowance = BCO, USDT < BCO s
-16 allowance = BCO, USDT = 0, BCO = 0 f
+15 + allowance = BCO, USDT < BCO s
+16 + allowance = BCO, USDT = 0, BCO = 0 f
 17 allowance = BCO, USDT != 0, BCO = 0 f
-18 allowance = BCO, USDT = 0, BCO != 0 f
+18 + allowance = BCO, USDT = 0, BCO != 0 f
 19 allowance > BCO, USDT > BCO f
 20 allowance > BCO, USDT = BCO f
 21 allowance > BCO, USDT < BCO f
