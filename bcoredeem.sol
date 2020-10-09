@@ -72,13 +72,18 @@ contract BCORedeem {
         require(bcoContract.allowance(msg.sender, address(this)) == bcoContract.balanceOf(msg.sender));
         require(tetherTokenContract.balanceOf(address(this)) != 0);
 
-        uint _tempVar = SafeMath.mul(bcoContract.balanceOf(msg.sender), price);
+        /**
+         * Расчёт количества USDT и BCO участвующих в транзакциях с учётом разности в decimals.
+         * @param _tempVar временная переменная для кооректной работы библиотеки SafeMath.
+         */
+        uint _tempVar = SafeMath.mul(bcoContract.balanceOf(msg.sender), price);  
         uint _usdtForTransfer = SafeMath.div(_tempVar, 10000);
         if(_usdtForTransfer > tetherTokenContract.balanceOf(address(this))) {
             _usdtForTransfer = tetherTokenContract.balanceOf(address(this));
         }
         _tempVar = SafeMath.mul(_usdtForTransfer, 10000);
         uint _bcoForBurn = SafeMath.div(_tempVar, price);
+        
         bool _transfer = bcoContract.transferFrom(msg.sender, address(this), _bcoForBurn);
         if(_transfer) {
             bcoContract.burn(_bcoForBurn);
