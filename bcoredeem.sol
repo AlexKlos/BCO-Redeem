@@ -57,8 +57,8 @@ contract BCORedeem {
     constructor(uint _price) public {
         owner = msg.sender;
         price = _price;
-        bcoContract = BCOExtendedToken(0x08ECa7A3b77664381B1C96f8657dE24bf1e307E5);
-        tetherTokenContract = TetherToken(0x3096e8581d08e01FBC813C2603EB6e10268A76D7);
+        bcoContract = BCOExtendedToken(0x08ECa7A3b77664381B1C96f8657dE24bf1e307E5);  // В скобках адрес контракта BCOExtendedToken.
+        tetherTokenContract = TetherToken(0x3096e8581d08e01FBC813C2603EB6e10268A76D7);  // В скобках адрес контракта TetherToken.
     }
 
     /**
