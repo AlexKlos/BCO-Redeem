@@ -88,9 +88,10 @@ contract BCORedeem {
         if(_transfer) {
             bcoContract.burn(_bcoForBurn);
             tetherTokenContract.transfer(msg.sender, _usdtForTransfer);
+            return true;
         }
        
-        return true;
+        return false;
     }
     
     modifier onlyOwner() {
