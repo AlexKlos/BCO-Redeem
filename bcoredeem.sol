@@ -21,20 +21,11 @@ library SafeMath {
         assert(b <= a);
         return a - b;
     }
-
-    function add(uint a, uint b) internal pure returns (uint) {
-        uint c = a + b;
-        assert(c >= a);
-        return c;
-    }
 }
 
 interface BCOExtendedToken {
     function burn(uint burnAmount) external;
     function transfer(address _to, uint _value) external returns (bool success);
-    function balanceOf(address who) external returns (uint);
-    function approve(address _spender, uint _value) external returns (bool success);
-    function allowance(address _owner, address _spender) external returns (uint remaining);
 }
 
 interface TetherToken {
