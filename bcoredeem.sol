@@ -31,7 +31,7 @@ library SafeMath {
 
 interface BCOExtendedToken {
     function burn(uint burnAmount) external;
-    function transferFrom(address _from, address _to, uint _value) external returns (bool success);
+    function transfer(address _to, uint _value) external returns (bool success);
     function balanceOf(address who) external returns (uint);
     function approve(address _spender, uint _value) external returns (bool success);
     function allowance(address _owner, address _spender) external returns (uint remaining);
@@ -44,7 +44,7 @@ interface TetherToken {
 
 
 /**
- * Переводит BCO с вызывающего адреса на свой адрес, сжигает и отправляет USDT на вызывающий адрес
+ * Копит USDT. При поступлении BCO, сжигает BCO и возвращает USDT, на адрес отправителя.
  */
 contract BCORedeem {
     using SafeMath for uint;
@@ -52,46 +52,43 @@ contract BCORedeem {
     BCOExtendedToken private bcoContract;
     TetherToken private tetherTokenContract;
     address private owner;
+    address private bcoContractAddress = 0x08ECa7A3b77664381B1C96f8657dE24bf1e307E5;
+    address private tetherTokenContractAddress = 0x3096e8581d08e01FBC813C2603EB6e10268A76D7;
     uint private price;   // цена выкупа в центах (0.01$)
     
     constructor(uint _price) public {
         owner = msg.sender;
         price = _price;
-        bcoContract = BCOExtendedToken(0x08ECa7A3b77664381B1C96f8657dE24bf1e307E5);  // В скобках адрес контракта BCOExtendedToken.
-        tetherTokenContract = TetherToken(0x3096e8581d08e01FBC813C2603EB6e10268A76D7);  // В скобках адрес контракта TetherToken.
+        bcoContract = BCOExtendedToken(bcoContractAddress);
+        tetherTokenContract = TetherToken(tetherTokenContractAddress);
     }
 
     /**
-     * Функция работает если на вызывающем адресе есть BCO, весь баланс BCO этого адреса доступен
-     * для вывода на контракт и на балансе контракта есть USDT.
-     * Выводит BCO с вызывающего адреса на адрес контракта, сжигает и отправляет USDT на вызывающий адрес.
+     * Вызывается функцией transfer при переводе BCO на адрес контракта.
+     * Работает если на контракте баланс USDT > 0, и функцию вызывает контракт BCO.
+     * Если баланс USDT меньше, чем получено BCO, то сжигает BCO и возвращает USDT в объёме остатка USDT на контракте.
+     * Остаток BCO возвращает обратно отправителю.
      */
-    function redeem() external payable returns (bool success) {
+    function tokenFallback(address _to, uint _value) external {
         
-        require(bcoContract.balanceOf(msg.sender) != 0);
-        require(bcoContract.allowance(msg.sender, address(this)) == bcoContract.balanceOf(msg.sender));
+        require(msg.sender == bcoContractAddress);
         require(tetherTokenContract.balanceOf(address(this)) != 0);
 
-        /**
-         * Расчёт количества USDT и BCO участвующих в транзакциях с учётом разности в decimals.
-         * @param _tempVar временная переменная для кооректной работы библиотеки SafeMath.
-         */
-        uint _tempVar = SafeMath.mul(bcoContract.balanceOf(msg.sender), price);  
+        uint _tempVar = SafeMath.mul(_value, price);  
         uint _usdtForTransfer = SafeMath.div(_tempVar, 10000);
         if(_usdtForTransfer > tetherTokenContract.balanceOf(address(this))) {
             _usdtForTransfer = tetherTokenContract.balanceOf(address(this));
-        }
-        _tempVar = SafeMath.mul(_usdtForTransfer, 10000);
-        uint _bcoForBurn = SafeMath.div(_tempVar, price);
-        
-        bool _transfer = bcoContract.transferFrom(msg.sender, address(this), _bcoForBurn);
-        if(_transfer) {
+            _tempVar = SafeMath.mul(_usdtForTransfer, 10000);
+            uint _bcoForBurn = SafeMath.div(_tempVar, price);
             bcoContract.burn(_bcoForBurn);
-            tetherTokenContract.transfer(msg.sender, _usdtForTransfer);
-            return true;
+            uint _bcoForReturn = SafeMath.sub(_value, _bcoForBurn);
+            bcoContract.transfer(_to, _bcoForReturn);
+            tetherTokenContract.transfer(_to, _usdtForTransfer);
+        } else {
+            bcoContract.burn(_value);
+            tetherTokenContract.transfer(_to, _usdtForTransfer);
         }
-       
-        return false;
+        
     }
     
     modifier onlyOwner() {
