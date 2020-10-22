@@ -106,6 +106,10 @@ contract BCORedeem {
     // Redeem price (0.01$)
     uint private price;
     
+    // ---------
+    // FUNCTIONS
+    // ---------
+    
     constructor(uint _price) public {
         owner = msg.sender;
         price = _price;
