@@ -96,11 +96,11 @@ contract BCORedeem {
     // BCO contract reference
     BCOExtendedToken private bcoContract;
     // BCO contract address
-    address private bcoContractAddress = 0x08ECa7A3b77664381B1C96f8657dE24bf1e307E5;
+    address private bcoContractAddress = 0x865D176351f287fE1B0010805b110d08699C200A;
     // USDT contract reference
     TetherToken private tetherTokenContract;
     // USDT contract address
-    address private tetherTokenContractAddress = 0x3096e8581d08e01FBC813C2603EB6e10268A76D7;
+    address private tetherTokenContractAddress = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     // Contract owner address
     address private owner;
     // Redeem price (0.01$)
@@ -175,7 +175,7 @@ contract BCORedeem {
     /**
      @dev               Transfer ownable to new address   
      @param _newOwner   The new owner
-    */
+     */
     function setOwner(address _newOwner) public onlyOwner {
         owner = _newOwner;
     }
